@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         PATH = "${PATH}:${getTerraformPath()}"
-        ACTION = "apply"
+        ACTION = "destroy"
         RUNNER = "Charles"
     }
     stages{
@@ -35,17 +35,17 @@ pipeline {
          }
         stage('Terraform Final Action'){
             steps {
-                slackSend (color: '#FFFF00', message: "STARTED Apply: Job by ${RUNNER}' ${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                slackSend (color: '#FFFF00', message: "STARTED Destroy: Job by ${RUNNER}' ${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
                 script{stage("Performing Terraform ${ACTION}")}
                 sh "terraform ${ACTION} --auto-approve"
                 //  sh "terraform apply  -input=false tfplan"
             }
         }
-        stage('Terraform Destroy'){
-            steps {
-                 sh "terraform destroy -auto-approve"
-            }
-        }
+        // stage('Terraform Destroy'){
+        //     steps {
+        //          sh "terraform destroy -auto-approve"
+        //     }
+        // }
     }
 }
     def getTerraformPath(){
