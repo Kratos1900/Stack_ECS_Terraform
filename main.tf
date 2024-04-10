@@ -75,14 +75,7 @@ resource "aws_lb_target_group" "ClixxTFTG" {
     matcher             = "200-399"  # HTTP status codes indicating a healthy instance
  }
 }
-#######Fix line 197
-# # Attach instances to target group
-# resource "aws_lb_target_group_attachment" "app_tg_attachment" {
-#   count             = length(data.aws_autoscaling_groups.my_asg.names[count.index].instances)
-#   target_group_arn  = aws_lb_target_group.ClixxTFTG.arn
-#   target_id         = data.aws_autoscaling_groups.my_asg.names[count.index].id
-#   port              = 80
-# }
+
 
 # Creating a listener rule 
 resource "aws_lb_listener_rule" "lb_listner_rule" {

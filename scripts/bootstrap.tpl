@@ -1,6 +1,5 @@
 #!/bin/bash -x
 sudo su -
-#sudo yum update -y
 yum install -y nfs-utils
 #EFS CREATION AND MOUNTING
 TOKEN=$(curl --request PUT "http://169.254.169.254/latest/api/token" --header "X-aws-ec2-metadata-token-ttl-seconds: 3600")
@@ -31,7 +30,15 @@ fi
 git clone https://github.com/stackitgit/CliXX_Retail_Repository.git
 cp -r CliXX_Retail_Repository/* /var/www/html
   
- 
+#Creating Docker
+sudo amazon-linux-extras install docker -y
+sudo systemctl start docker
+sudo systemctl status docker
+sudo systemctl enable docker
+sudo usermod -a -G docker ec2-user 
+mkdir Dockerfile
+cp -r /var/www/html Dockerfile
+
 # Replace DB_HOST name with RDS endpoint 
 
 sed -i -e "/.*DB_HOST*./ s/.*/define('DB_HOST', '${DB_HOST}');/" /var/www/html/wp-config.php

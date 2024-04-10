@@ -17,7 +17,7 @@ resource "aws_security_group_rule" "bast_http" {
 }
 
 #declaring "http" security group rules for http
-resource "aws_security_group_rule" "webpp_http" {
+resource "aws_security_group_rule" "webapp_http" {
     security_group_id        = aws_security_group.rds_sg.id
     description              = "Allows inbound traffic from the public subnet"
     type                     ="ingress"
