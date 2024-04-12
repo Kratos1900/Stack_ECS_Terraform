@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         PATH = "${PATH}:${getTerraformPath()}"
-        ACTION = "destroy"
+        ACTION = "apply"
         RUNNER = "Charles"
     }
     stages{
@@ -35,7 +35,7 @@ pipeline {
          }
         stage('Terraform Final Action'){
             steps {
-                slackSend (color: '#FFFF00', message: "STARTED Destroy: Job by ${RUNNER}' ${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+                slackSend (color: '#FFFF00', message: "STARTED Apply: Job by ${RUNNER}' ${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
                 script{stage("Performing Terraform ${ACTION}")}
                 sh "terraform ${ACTION} --auto-approve"
                 //  sh "terraform apply  -input=false tfplan"

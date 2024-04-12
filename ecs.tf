@@ -11,13 +11,11 @@ resource "null_resource" "build_docker_image" {
 
   provisioner "local-exec" {
     command = <<EOF
-      # Build the Docker image
-      docker build -t ${aws_ecr_repository.clixx_app_repo.repository_url}:latest /var/www/html
-
-      # Login to ECR
+    
       aws ecr get-login-password --region ${var.AWS_REGION} | docker login --username AWS --password-stdin ${aws_ecr_repository.clixx_app_repo.repository_url}
 
-      # Push the Docker image to ECR
+      docker build -t ${aws_ecr_repository.clixx_app_repo.repository_url}:latest /var/www/html
+
       docker push ${aws_ecr_repository.clixx_app_repo.repository_url}:latest
     EOF
   }
@@ -35,7 +33,7 @@ resource "aws_ecs_task_definition" "clixx_app_task" {
   container_definitions    = <<DEFINITION
   [
     {
-      "name": "web-app-container",
+      "name": "clixx-app-container",
       "image": "${aws_ecr_repository.clixx_app_repo.repository_url}:latest",
       "cpu": 256,
       "memory": 512,
@@ -64,6 +62,5 @@ resource "aws_ecs_service" "clixx_app_service" {
   network_configuration {
     subnets         = aws_subnet.clixx-prvt_subnet[*].id 
     security_groups = [aws_security_group.my_security_group.id, aws_security_group.bastion-sg.id]      
-    assign_public_ip = true
   }
 }
