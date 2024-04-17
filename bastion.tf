@@ -1,7 +1,7 @@
 #Bastion Server creation
 resource "aws_instance" "bastion_server" {
   count                  =  length(var.azs)
-  ami                    =  data.aws_ami.stack_ami.id
+  ami                    =  data.aws_secretsmanager_secret.ami.secret_string
   instance_type          =  var.EC2_Components["instance_type"]
   subnet_id              =  aws_subnet.Bastion-pub_subnet[count.index].id
   associate_public_ip_address =  true

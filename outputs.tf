@@ -15,11 +15,15 @@ output "ebs_volume_count" {
   value = length(var.ebs_volumes)
 }
 
-output "aws_instance_count" {
-  value = length(aws_launch_configuration.appserver)
-}
+# output "aws_instance_count" {
+#   value = length(aws_launch_configuration.appserver)
+# }
 
 #Retrieving RDS Endpoint
 output "RDS_ENDPOINT" {
   value = aws_db_instance.clixx.*.endpoint
+}
+
+output "clixx_app_repo_url" {
+  value = aws_ecr_repository.clixx_app_repo.repository_url
 }

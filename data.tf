@@ -50,6 +50,9 @@ data "aws_db_snapshot" "clixx_snapshot" {
 }
 
 data "aws_secretsmanager_secret_version" "creds" {
-  # Fill in the name you gave to your secret
   secret_id = "clixx_creds"
  }
+
+ data "aws_secretsmanager_secret" "ami" {
+  name = "ecs_id"
+}

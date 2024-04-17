@@ -31,17 +31,6 @@ git clone https://github.com/stackitgit/CliXX_Retail_Repository.git
 cp -r CliXX_Retail_Repository/* /var/www/html
   
 
-sudo amazon-linux-extras install docker -y
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo usermod -a -G docker ec2-user 
-
-cat <<EOF > Dockerfile
-FROM wordpress:php7.1-apache
-COPY . /var/www/html 
-EOF
-
-
 # Replace DB_HOST name with RDS endpoint 
 
 sed -i -e "/.*DB_HOST*./ s/.*/define('DB_HOST', '${DB_HOST}');/" /var/www/html/wp-config.php
