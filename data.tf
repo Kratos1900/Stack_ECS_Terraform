@@ -53,6 +53,6 @@ data "aws_secretsmanager_secret_version" "creds" {
   secret_id = "clixx_creds"
  }
 
- data "aws_secretsmanager_secret" "ami" {
-  name = "ecs_id"
+ data "aws_secretsmanager_secret_version" "ami" {
+  secret_id = "ecs_id"
 }

@@ -7,7 +7,7 @@ locals {
 
 locals {
   ecs_id = jsondecode(
-    data.aws_secretsmanager_secret.ami.secret_string
+    data.aws_secretsmanager_secret_version.ami.secret_string
   )
  }
 
@@ -161,7 +161,7 @@ data "aws_ssm_parameter" "ecs_node_ami" {
 
 resource "aws_launch_template" "ecs_ec2" {
   name_prefix            = "clixx-ecs-ec2-"
-  image_id               = data.aws_secretsmanager_secret.ami.secret_string
+  image_id               = data.aws_secretsmanager_secret_version.ami.secret_string
   instance_type          = var.EC2_Components["instance_type"]
   vpc_security_group_ids = [aws_security_group.my_security_group.id, aws_security_group.bastion-sg.id]
 
