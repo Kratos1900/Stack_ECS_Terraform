@@ -169,7 +169,7 @@ resource "aws_ecs_task_definition" "clixx_app_task" {
   DEFINITION
   cpu                      = "256"
   memory                   = "512"
-  network_mode             = "awsvpc"
+  network_mode             = "bridge"
 }
 
 # ECS Service
