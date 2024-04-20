@@ -11,7 +11,7 @@ data "template_file" "bootstrap" {
     DB_NAME        = local.clixx_creds.DB_NAME
     DB_PASSWORD    = local.clixx_creds.DB_PASSWORD
     DB_HOST        = split(":", aws_db_instance.clixx[0].endpoint)[0]
-    image_id       = local.ecs_id
+    image_id       = data.aws_secretsmanager_secret_version.ami.secret_string
 
   }
 }
