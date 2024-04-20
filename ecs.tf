@@ -169,6 +169,7 @@ resource "aws_ecs_task_definition" "clixx_app_task" {
   DEFINITION
   cpu                      = "256"
   memory                   = "512"
+  network_mode             = "awsvpc"
 }
 
 # ECS Service
@@ -182,7 +183,7 @@ resource "aws_ecs_service" "clixx_app_service" {
   network_configuration {
     subnets         = aws_subnet.clixx-prvt_subnet[*].id 
     security_groups = [aws_security_group.my_security_group.id, aws_security_group.bastion-sg.id]   
- 
+    
  
 
   }
