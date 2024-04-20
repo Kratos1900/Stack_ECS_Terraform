@@ -14,7 +14,7 @@ resource "aws_ecs_capacity_provider" "main" {
   name = "clixx-ecs-ec2-${count.index}"
 
   auto_scaling_group_provider {
-    auto_scaling_group_arn         = aws_autoscaling_group.my_asg[count.index].id
+    auto_scaling_group_arn         = aws_autoscaling_group.my_asg.arn
     managed_termination_protection = "DISABLED"
 
     managed_scaling {
