@@ -6,9 +6,7 @@ locals {
  }
 
 locals {
-  ecs_id = jsondecode(
-    data.aws_secretsmanager_secret_version.ami.secret_string
-  )
+  ecs_id = data.aws_secretsmanager_secret_version.ami.secret_string
  }
 
 
