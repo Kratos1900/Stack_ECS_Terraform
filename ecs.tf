@@ -9,36 +9,36 @@ resource "aws_ecs_cluster" "clixx_app_cluster" {
 #Take capacity provider out
 # --- ECS Capacity Provider ---
 
-resource "aws_ecs_capacity_provider" "main" {
-  count = length(var.azs)
-  name = "clixx-ecs-ec2-${count.index}"
+# resource "aws_ecs_capacity_provider" "main" {
+#   count = length(var.azs)
+#   name = "clixx-ecs-ec2-${count.index}"
 
-  auto_scaling_group_provider {
-    auto_scaling_group_arn         = aws_autoscaling_group.my_asg.arn
-    managed_termination_protection = "DISABLED"
+#   auto_scaling_group_provider {
+#     auto_scaling_group_arn         = aws_autoscaling_group.my_asg.arn
+#     managed_termination_protection = "DISABLED"
 
-    managed_scaling {
-      maximum_scaling_step_size = 2
-      minimum_scaling_step_size = 1
-      status                    = "ENABLED"
-      target_capacity           = 100
-    }
-  }
-}
+#     managed_scaling {
+#       maximum_scaling_step_size = 2
+#       minimum_scaling_step_size = 1
+#       status                    = "ENABLED"
+#       target_capacity           = 100
+#     }
+#   }
+# }
 
 
-#ECS Capacity Provider
-resource "aws_ecs_cluster_capacity_providers" "main" {
-  count = length(var.azs)
-  cluster_name       = aws_ecs_cluster.clixx_app_cluster.name
-  capacity_providers = [aws_ecs_capacity_provider.main[count.index].name]
+# #ECS Capacity Provider
+# resource "aws_ecs_cluster_capacity_providers" "main" {
+#   count = length(var.azs)
+#   cluster_name       = aws_ecs_cluster.clixx_app_cluster.name
+#   capacity_providers = [aws_ecs_capacity_provider.main[count.index].name]
 
-  default_capacity_provider_strategy {
-    capacity_provider = aws_ecs_capacity_provider.main[count.index].name
-    base              = 1
-    weight            = 100
-  }
-}
+#   default_capacity_provider_strategy {
+#     capacity_provider = aws_ecs_capacity_provider.main[count.index].name
+#     base              = 1
+#     weight            = 100
+#   }
+# }
 
 
 ################################################################################
@@ -200,12 +200,6 @@ resource "aws_ecs_service" "clixx_app_service" {
     container_port   = 80
   }
 
-  depends_on = [aws_ecs_cluster_capacity_providers.main]
-
-  lifecycle {
-    ignore_changes = [
-      capacity_provider_strategy,
-    ]
-  }
+  depends_on = [aws_autoscaling_group.my_asg]
 
   }
