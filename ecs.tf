@@ -9,36 +9,36 @@ resource "aws_ecs_cluster" "clixx_app_cluster" {
 #Take capacity provider out
 # --- ECS Capacity Provider ---
 
-# resource "aws_ecs_capacity_provider" "main" {
-#   count = length(var.azs)
-#   name = "clixx-ecs-ec2-${count.index}"
+resource "aws_ecs_capacity_provider" "main" {
+  count = length(var.azs)
+  name = "clixx-ecs-ec2-${count.index}"
 
-#   auto_scaling_group_provider {
-#     auto_scaling_group_arn         = aws_autoscaling_group.my_asg.arn
-#     managed_termination_protection = "DISABLED"
+  auto_scaling_group_provider {
+    auto_scaling_group_arn         = aws_autoscaling_group.my_asg.arn
+    managed_termination_protection = "DISABLED"
 
-#     managed_scaling {
-#       maximum_scaling_step_size = 2
-#       minimum_scaling_step_size = 1
-#       status                    = "ENABLED"
-#       target_capacity           = 100
-#     }
-#   }
-# }
+    managed_scaling {
+      maximum_scaling_step_size = 2
+      minimum_scaling_step_size = 1
+      status                    = "ENABLED"
+      target_capacity           = 100
+    }
+  }
+}
 
 
-# #ECS Capacity Provider
-# resource "aws_ecs_cluster_capacity_providers" "main" {
-#   count = length(var.azs)
-#   cluster_name       = aws_ecs_cluster.clixx_app_cluster.name
-#   capacity_providers = [aws_ecs_capacity_provider.main[count.index].name]
+#ECS Capacity Provider
+resource "aws_ecs_cluster_capacity_providers" "main" {
+  count = length(var.azs)
+  cluster_name       = aws_ecs_cluster.clixx_app_cluster.name
+  capacity_providers = [aws_ecs_capacity_provider.main[count.index].name]
 
-#   default_capacity_provider_strategy {
-#     capacity_provider = aws_ecs_capacity_provider.main[count.index].name
-#     base              = 1
-#     weight            = 100
-#   }
-# }
+  default_capacity_provider_strategy {
+    capacity_provider = aws_ecs_capacity_provider.main[count.index].name
+    base              = 1
+    weight            = 100
+  }
+}
 
 
 ################################################################################
@@ -151,25 +151,29 @@ resource "aws_cloudwatch_log_group" "ecs" {
 # ECS Task Definition
 resource "aws_ecs_task_definition" "clixx_app_task" {
   family                   = "clixx-app-task"
-  container_definitions    = <<DEFINITION
-  [
-    {
-      "name": "clixx-app-container",
-      "image": "${aws_ecr_repository.clixx_app_repo.repository_url}:latest",
-      "cpu": 256,
-      "memory": 512,
-      "portMappings": [
-        {
-          "containerPort": 80,
-          "hostPort": 80
-        }
-      ]
-    }
-  ]
-  DEFINITION
+  task_role_arn      = aws_iam_role.ecs_task_role.arn
+  execution_role_arn = aws_iam_role.ecs_exec_role.arn
   cpu                      = "256"
   memory                   = "512"
   network_mode             = "bridge"
+  
+ container_definitions = jsonencode([{
+    name         = "app",
+    image        = "${aws_ecr_repository.clixx_app_repo.repository_url}:latest",
+    essential    = true,
+    portMappings = [{ containerPort = 80, hostPort = 80 }],
+
+
+    logConfiguration = {
+      logDriver = "awslogs",
+      options = {
+        "awslogs-region"        = "us-west-1",
+        "awslogs-group"         = aws_cloudwatch_log_group.ecs.name,
+        "awslogs-stream-prefix" = "cliXX"
+      }
+    },
+  }])
+
 }
 
 # ECS Service
@@ -181,10 +185,27 @@ resource "aws_ecs_service" "clixx_app_service" {
   desired_count   = 2
   launch_type     = "EC2"
 
-  # network_configuration {
-  #   subnets         = aws_subnet.clixx-prvt_subnet[*].id 
-  #   security_groups = [aws_security_group.my_security_group.id, aws_security_group.bastion-sg.id]   
+  force_new_deployment = true
+  placement_constraints {
+  type = "distinctInstance"
+ }
+
+  triggers = {
+   redeployment = timestamp()
+ }
     
- 
+ load_balancer {
+    target_group_arn = aws_lb_target_group.ClixxTFTG.arn
+    container_name   = "app"
+    container_port   = 80
+  }
+
+  depends_on = [aws_ecs_cluster_capacity_providers.main]
+
+  lifecycle {
+    ignore_changes = [
+      capacity_provider_strategy,
+    ]
+  }
 
   }
